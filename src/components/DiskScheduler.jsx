@@ -3,7 +3,7 @@ import InputForm from './InputForm';
 import AlgorithmSelector from './AlgorithmSelector';
 import VisualizationChart from './VisualizationChart';
 import ResultDisplay from './ResultDisplay';
-import { fcfs, sstf, scan, cscan, clook } from '../utils/algorithms';
+import { fcfs, sstf, scan, cscan, clook, look } from '../utils/algorithms';
 
 const DiskScheduler = () => {
     const [queue, setQueue] = useState([]);
@@ -17,6 +17,7 @@ const DiskScheduler = () => {
         fcfs: { name: 'First-Come, First-Served (FCFS)', fn: fcfs },
         sstf: { name: 'Shortest Seek Time First (SSTF)', fn: sstf },
         scan: { name: 'SCAN (Elevator)', fn: scan },
+        look: { name: 'LOOK', fn: look },
         cscan: { name: 'C-SCAN (Circular SCAN)', fn: cscan },
         clook: { name: 'C-LOOK', fn: clook },
     };
@@ -25,7 +26,7 @@ const DiskScheduler = () => {
         const algo = algorithms[selectedAlgorithm];
 
         let result;
-        if (selectedAlgorithm === 'scan') {
+        if (selectedAlgorithm === 'scan' || selectedAlgorithm === 'look') {
             result = algo.fn(queue, initialPosition, diskSize, direction);
         } else if (selectedAlgorithm === 'cscan' || selectedAlgorithm === 'clook') {
             result = algo.fn(queue, initialPosition, diskSize);

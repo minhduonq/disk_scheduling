@@ -149,6 +149,57 @@ export const cscan = (queue, initialPosition, diskSize) => {
     return { sequence, totalSeekDistance, jumpPoints };
 };
 
+export const look = (queue, initialPosition, diskSize, initialDirection = 'up') => {
+    const sequence = [initialPosition];
+    let totalSeekDistance = 0;
+    let currentPosition = initialPosition;
+    const jumpPoints = []; // Mảng lưu các điểm nhảy nếu cần
+
+    // Phân tách các yêu cầu thành các yêu cầu lớn hơn và nhỏ hơn vị trí hiện tại
+    const sortedQueue = [...queue].sort((a, b) => a - b);
+    const greaterRequests = sortedQueue.filter(pos => pos > initialPosition);
+    const lesserRequests = sortedQueue.filter(pos => pos < initialPosition);
+
+    // Xử lý theo hướng di chuyển ban đầu
+    if (initialDirection === 'up') {
+        // Xử lý tất cả các yêu cầu lớn hơn vị trí hiện tại
+        for (const position of greaterRequests) {
+            sequence.push(position);
+            totalSeekDistance += Math.abs(position - currentPosition);
+            currentPosition = position;
+        }
+
+        // Nếu có yêu cầu ở phía dưới, đổi hướng và xử lý các yêu cầu nhỏ hơn
+        if (lesserRequests.length > 0) {
+            // Không đi đến cuối đĩa, mà đổi hướng ngay tại yêu cầu lớn nhất
+            for (const position of lesserRequests.reverse()) {
+                sequence.push(position);
+                totalSeekDistance += Math.abs(position - currentPosition);
+                currentPosition = position;
+            }
+        }
+    } else {
+        // Xử lý tất cả các yêu cầu nhỏ hơn vị trí hiện tại
+        for (const position of lesserRequests.reverse()) {
+            sequence.push(position);
+            totalSeekDistance += Math.abs(position - currentPosition);
+            currentPosition = position;
+        }
+
+        // Nếu có yêu cầu ở phía trên, đổi hướng và xử lý các yêu cầu lớn hơn
+        if (greaterRequests.length > 0) {
+            // Không đi đến đầu đĩa, mà đổi hướng ngay tại yêu cầu nhỏ nhất
+            for (const position of greaterRequests) {
+                sequence.push(position);
+                totalSeekDistance += Math.abs(position - currentPosition);
+                currentPosition = position;
+            }
+        }
+    }
+
+    return { sequence, totalSeekDistance, jumpPoints };
+};
+
 
 export const clook = (queue, initialPosition) => {
     const sequence = [initialPosition];

@@ -25,7 +25,7 @@ const AlgorithmSelector = ({
                 ))}
             </div>
 
-            {selectedAlgorithm === 'scan' && (
+            {(selectedAlgorithm === 'scan' || selectedAlgorithm === 'look') && (
                 <div className="direction-selector">
                     <h3>Chọn hướng ban đầu:</h3>
                     <div>

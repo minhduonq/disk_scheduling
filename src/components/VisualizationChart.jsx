@@ -40,7 +40,8 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                         label: 'Đường di chuyển thông thường',
                         data: sequence.slice(lastSegmentEnd, jump.from + 1).map((value, index) => ({
                             y: lastSegmentEnd + index, // Thứ tự thực hiện trên trục Y
-                            x: value              // Vị trí trục rãnh trên trục X
+                            x: value,              // Vị trí trục rãnh trên trục X
+                            position: value        // Lưu giá trị vị trí để hiển thị
                         })),
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgb(75, 192, 192)',
@@ -56,8 +57,8 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                 const jumpSegment = {
                     label: 'Đoạn nhảy không tính quãng đường',
                     data: [
-                        { y: jump.from, x: sequence[jump.from] },
-                        { y: jump.to, x: sequence[jump.to] }
+                        { y: jump.from, x: sequence[jump.from], position: sequence[jump.from] },
+                        { y: jump.to, x: sequence[jump.to], position: sequence[jump.to] }
                     ],
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgb(255, 99, 132)',
@@ -78,7 +79,8 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                     label: 'Đường di chuyển thông thường',
                     data: sequence.slice(lastSegmentEnd).map((value, index) => ({
                         y: lastSegmentEnd + index,
-                        x: value
+                        x: value,
+                        position: value
                     })),
                     borderColor: 'rgb(75, 192, 192)',
                     backgroundColor: 'rgb(75, 192, 192)',
@@ -99,7 +101,8 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                     label: 'Vị trí trục rãnh',
                     data: sequence.map((value, index) => ({
                         y: index,
-                        x: value
+                        x: value,
+                        position: value
                     })),
                     borderColor: 'rgb(75, 192, 192)',
                     backgroundColor: 'rgb(75, 192, 192)',
@@ -154,7 +157,6 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                                 }
                                 return '';
                             }
-
                         }
                     },
                     y: {
@@ -229,7 +231,6 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                         },
                         padding: { top: 10, bottom: 20 }
                     },
-                    // Thêm annotation để hiển thị mốc quan trọng trên trục X
                     annotation: {
                         annotations: uniquePositions.map(pos => ({
                             type: 'line',
@@ -266,7 +267,28 @@ const VisualizationChart = ({ sequence, diskSize, algorithmName, jumpPoints = []
                         bottom: 10
                     }
                 }
-            }
+            },
+            plugins: [{
+                afterDraw: function (chart) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                            meta.data.forEach(function (element, index) {
+                                // Đặt định dạng cho nhãn
+                                ctx.fillStyle = 'black';
+                                ctx.font = '11px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+
+                                // Lấy giá trị vị trí và vẽ nhãn
+                                const position = dataset.data[index].position;
+                                ctx.fillText(position, element.x, element.y - 10);
+                            });
+                        }
+                    });
+                }
+            }]
         });
 
         return () => {
